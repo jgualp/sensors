@@ -1,0 +1,11 @@
+<h1>Monitor de temperatura</h1>
+    
+    {% if latest_sensor_list %}
+        <ul>
+        {% for s in latest_sensor_list %}
+            <li><a href="{% url 'temperature:graph_form' s.id %}">{{s}}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hi ha sensors disponibles</p>
+    {% endif %}

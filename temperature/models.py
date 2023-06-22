@@ -22,4 +22,7 @@ class TemperatureSample(models.Model):
         locale.setlocale(locale.LC_ALL, '')
         valor = locale.format('%.2f', self.value)
         return self.sensor.location_desc + " - " + valor + "ºC - " + self.timestamp.strftime("%Y/%m/%d %H:%M:%S")
+    
+    def __unicode__(self):
+        return u'%.2f' % self.value
 

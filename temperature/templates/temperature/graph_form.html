@@ -1,0 +1,7 @@
+<h1>Interval de visualització de la gràfica</h1>
+
+<form action="/temperature/{{id}}/graph_view/" method="post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <input type="submit" value="Visualitzar">
+</form>

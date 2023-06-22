@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <title>Evolució de temperatura</title>
+        {% load static %}
+        <script type="text/javascript" src="{% static "temperature/fusioncharts.js" %}"></script>
+        <script type="text/javascript" src="{% static "temperature/fusioncharts.charts.js" %}"></script>
+        <script type="text/javascript" src="{% static "temperature/themes/fusioncharts.theme.fusion.js" %}"></script>
+    </head>
+    <body>
+        <div id="viewtemp">{{ output|safe }}</div>
+    </body>
+</html>
