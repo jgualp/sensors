@@ -5,6 +5,7 @@ from .models import TemperatureSample, TemperatureSensor
 from .fusioncharts import FusionCharts
 from django.template import loader
 from django.urls import reverse
+from datetime import datetime
 
 # Vista inicial (root).
 def index(request):
@@ -18,8 +19,9 @@ def index(request):
 
 # Vista formulari per configurar la gràfica que volem visualitzar.
 class GraphForm(forms.Form):
-    data_hora_inicial = forms.DateTimeField(label="Data/hora inicial")
-    data_hora_final = forms.DateTimeField(label="Data/hora final")
+    #data_hora_inicial = forms.DateTimeField(label="Data/hora inicial")
+    #data_hora_final = forms.DateTimeField(label="Data/hora final")
+    data = forms.DateField(label="Data")
 
 def graph_form(request, sensor_id):
     gf = GraphForm()
@@ -27,31 +29,42 @@ def graph_form(request, sensor_id):
 
 def graph_view(request, sensor_id):
     if request.method=="POST":
-        sensor = get_object_or_404(TemperatureSensor, pk=sensor_id)
 
-        dataSource = {}
-        dataSource['chart'] = {
-            "caption": "Evolució de la temperatura",
-            "subCaption": str(sensor),
-            "xAxisName": "Data/Hora",
-            "yAxisName": "Temperatura (ºC)",
-            "numberSuffix": "ºC",
-            "theme": "fusion",
-        }
+        form = GraphForm(request.POST)
 
-        dataSource['data'] = []
+        if form.is_valid():
+            sensor = get_object_or_404(TemperatureSensor, pk=sensor_id)
+            data = form.cleaned_data["data"]
+    
+            start = str(data) + ' 00:00:00.000000'
+            end = str(data) + ' 23:59:59.999999'
+            #user = UserAccount.objects.filter(created_at__gte=start, created_at__lte=end)
+            #user = UserAccount.objects.filter(created_at__range=(start, end))
 
-        # Iterate through the data in `Revenue` model and insert in to the `dataSource['data']` list.
-        for key in TemperatureSample.objects.all():
-            data = {}
-            data['label'] = str(key.timestamp)
-            data['value'] = float(key.value)
-            dataSource['data'].append(data)
 
-        # Create an object for the Column 2D chart using the FusionCharts class constructor
-        line2D = FusionCharts("line", "ex1" , "600", "350", "viewtemp", "json", dataSource)
-        return render(request, 'temperature/graph_view.html', {'output': line2D.render()})
-        #return HttpResponse(dataSource['data'])
+            dataSource = {}
+            dataSource['chart'] = {
+                "caption": "Evolució de la temperatura",
+                "subCaption": str(sensor),
+                "xAxisName": "Data/Hora",
+                "yAxisName": "Temperatura (ºC)",
+                "numberSuffix": "ºC",
+                "theme": "zune",
+            }
+
+            dataSource['data'] = []
+
+            # Iterate through the data in `Revenue` model and insert in to the `dataSource['data']` list.
+            for key in TemperatureSample.objects.filter(timestamp__range=(start, end)).filter(sensor__id=sensor_id):
+                data = {}
+                data['label'] = key.timestamp.strftime('%H:%M:%S')
+                data['value'] = float(key.value)
+                dataSource['data'].append(data)
+
+            # Create an object for the Column 2D chart using the FusionCharts class constructor
+            line2D = FusionCharts("line", "ex1" , "600", "350", "viewtemp", "json", dataSource)
+            return render(request, 'temperature/graph_view.html', {'output': line2D.render()})
+            #return HttpResponse(dataSource['data'])
         
 
     return HttpResponseRedirect(reverse("temperature:graph_form"))
