@@ -54,7 +54,7 @@ def graph_view(request, sensor_id):
 
             dataSource['data'] = []
 
-            # Iterate through the data in `Revenue` model and insert in to the `dataSource['data']` list.
+            # Iterem sobre les mostres de temperatura seleccionant les del dia seleccionat i del sensor que toca.
             for key in TemperatureSample.objects.filter(timestamp__range=(start, end)).filter(sensor__id=sensor_id):
                 data = {}
                 data['label'] = key.timestamp.strftime('%H:%M:%S')
@@ -62,7 +62,7 @@ def graph_view(request, sensor_id):
                 dataSource['data'].append(data)
 
             # Create an object for the Column 2D chart using the FusionCharts class constructor
-            line2D = FusionCharts("line", "ex1" , "600", "350", "viewtemp", "json", dataSource)
+            line2D = FusionCharts("line", "ex1" , "1200", "600", "viewtemp", "json", dataSource)
             return render(request, 'temperature/graph_view.html', {'output': line2D.render()})
             #return HttpResponse(dataSource['data'])
         
