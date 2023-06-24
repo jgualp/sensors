@@ -8,7 +8,7 @@ from django.urls import reverse
 
 # Vista inicial (root).
 def index(request):
-    latest_sensor_list = TemperatureSensor.objects.order_by("manuf_model")
+    latest_sensor_list = TemperatureSensor.objects.order_by("location_desc")
     template = loader.get_template("temperature/index.html")
     context = {
         "latest_sensor_list": latest_sensor_list,
@@ -23,6 +23,7 @@ class GraphForm(forms.Form):
 def graph_form(request, sensor_id):
     gf = GraphForm()
     return render(request, "temperature/graph_form.html", {"form": gf, "id":sensor_id})
+
 
 # Vista de la gràfica que recull la data del formulari i genera la gràfica d'aquell dia.
 def graph_view(request, sensor_id):
@@ -81,8 +82,7 @@ def graph_view(request, sensor_id):
 
             # Creem els objectes que necessita el constructor de la gràfica.
             fusionTable = FusionTable(schema, dades_temp)
-            timeSeries = TimeSeries(fusionTable)
-            
+            timeSeries = TimeSeries(fusionTable)            
 
             # Creem un objecte per a la gràfica utilitzant el constructor de FusionCharts: "line"
             # El cinquè paràmetre, ha de coincidir amb el nom del <div> de la template HTML on
@@ -92,6 +92,4 @@ def graph_view(request, sensor_id):
             # "outuput" és el nom de la variable de substitució que tenim a la template HTML.
             return render(request, 'temperature/graph_view.html', {'output': grafica.render()})
             
-        
-
     return HttpResponseRedirect(reverse("temperature:graph_form"))
